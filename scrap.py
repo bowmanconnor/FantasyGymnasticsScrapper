@@ -51,35 +51,35 @@ def get_rosters(team_ids, base_url):
         roster = []
         for row in rows:
             values = row.find_all(class_='rt-td')
-            roster.append((values[0].string, values[1].string, values[2].string, values[3].string))    
+            roster.append((values[0].string, values[1].string, values[2].string, values[3].string, values[4].string))    
         rosters[team_name] = roster   
     return rosters
 
 def main():
-    womens_teams_url = 'https://roadtonationals.com/results/charts/'
-    womens_team_base_url = 'https://roadtonationals.com/results/teams/dashboard/2020/'
+   # womens_teams_url = 'https://roadtonationals.com/results/charts/'
+   # womens_team_base_url = 'https://roadtonationals.com/results/teams/dashboard/2020/'
 
     mens_teams_url = 'https://roadtonationals.com/results/chartsM/'
     mens_team_base_url = 'https://roadtonationals.com/results/teamsM/dashboard/2020/'
 
-    womens_team_ids = {}
+   # womens_team_ids = {}
     mens_team_ids = {}
-    womens_rosters = {}
+   # womens_rosters = {}
     mens_rosters = {}
 
-    womens_team_ids = get_team_ids(womens_teams_url)
+   # womens_team_ids = get_team_ids(womens_teams_url)
     mens_team_ids = get_team_ids(mens_teams_url)
 
-    womens_rosters = get_rosters(womens_team_ids, womens_team_base_url)
+   # womens_rosters = get_rosters(womens_team_ids, womens_team_base_url)
     mens_rosters = get_rosters(mens_team_ids, mens_team_base_url)
 
-    for team_name, roster in womens_rosters.items():
-        print(team_name)
-        print('-------------------------------')
-        for team_member in roster:
-            print(team_member)
-        print()
-    print('---------------------------------------------------------------------')
+    # for team_name, roster in womens_rosters.items():
+    #     print(team_name)
+    #     print('-------------------------------')
+    #     for team_member in roster:
+    #         print(team_member)
+    #     print()
+    # print('---------------------------------------------------------------------')
 
     for team_name, roster in mens_rosters.items():
         print(team_name)

@@ -30,7 +30,6 @@ def get_team_ids(url):
         team_ids[team_name] = team_id
     print("Team ids complete")
     return team_ids
-
 def get_rosters(team_ids, base_url, past_url):
     rosters = {}
     print("Getting 2020 rosters")
@@ -48,7 +47,6 @@ def get_rosters(team_ids, base_url, past_url):
         rosters[team_name] = roster
     print("--------------------------------------------")   
     return rosters
-
 def get_past_averages(past_url, team_ids, rosters):
     averages_team = {}
     print("Getting 2019 averages")
@@ -81,11 +79,6 @@ def get_past_averages(past_url, team_ids, rosters):
         averages_team[team_name] = averages
     print("--------------------------------------------")   
     return averages_team
-
-
-
-
-
 def main():
    # womens_teams_url = 'https://roadtonationals.com/results/charts/'
    # womens_team_base_url = 'https://roadtonationals.com/results/teams/dashboard/2020/'

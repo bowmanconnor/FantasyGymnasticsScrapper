@@ -5,21 +5,25 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
 import os
+import platform
 from bs4 import BeautifulSoup
 import time
 # Set up chrome webdriver
 chrome_options = Options()
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--window-size=1920x1080')
-chrome_driver = os.getcwd() + '/chromedriver'
+
+# differentiate based on operating system
+chrome_driver = os.getcwd()
+chrome_driver += "/chromedriver_mac" if platform.system() == "Darwin" else "/chromedriver_win.exe"
+print(chrome_driver)
 driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=chrome_driver)
 
 def get_team_ids(url):
     print("Getting team ids")
     team_ids = {}
     driver.get(url)
-    time.sleep(1)
-    WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "rt-tr-group")))
+    WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "rt-tr-group")))
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     elements = soup.find_all(class_='rt-tr-group')
     for element in elements:
@@ -30,14 +34,14 @@ def get_team_ids(url):
         team_ids[team_name] = team_id
     print("Team ids complete")
     return team_ids
+
 def get_rosters(team_ids, base_url, past_url):
     rosters = {}
     print("Getting 2020 rosters")
     for team_name, team_id in team_ids.items():
         print(team_name)
         driver.get(base_url + team_id)
-        time.sleep(1)
-        WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "rt-tr-group")))
+        WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "rt-tr-group")))
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         rows = soup.find(class_='rt-table').find_all(class_='rt-tr')[1:]
         roster = {}
@@ -47,23 +51,21 @@ def get_rosters(team_ids, base_url, past_url):
         rosters[team_name] = roster
     print("--------------------------------------------")   
     return rosters
+
 def get_past_averages(past_url, team_ids, rosters):
     averages_team = {}
     print("Getting 2019 averages")
     for team_name, team_id in team_ids.items():
         print(team_name)
         driver.get(past_url + team_id)
-        time.sleep(1)
-        WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "rosterBox")))
+        WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "rosterBox")))
         button = driver.find_element_by_xpath('//button[text()="Average"]')
         button.click()
-        time.sleep(1)
-        WebDriverWait(driver, 30).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '[style="min-width: 750px;"]')))
+        WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '[style="min-width: 750px;"]')))
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         averages = {}
         rows = soup.find(class_='rt-tbody').find_all(class_='rt-tr-group')
         for row in rows:
-            #values = row.find_elements_by_class_name('rt-td')
             values = row.find_all(class_='rt-td')
             full_name = values[0].string + ' '  + values[1].string
             if full_name in rosters[team_name].keys():
@@ -79,6 +81,7 @@ def get_past_averages(past_url, team_ids, rosters):
         averages_team[team_name] = averages
     print("--------------------------------------------")   
     return averages_team
+
 def main():
    # womens_teams_url = 'https://roadtonationals.com/results/charts/'
    # womens_team_base_url = 'https://roadtonationals.com/results/teams/dashboard/2020/'

@@ -15,8 +15,14 @@ chrome_options.add_argument('--window-size=1920x1080')
 
 # differentiate based on operating system
 chrome_driver = os.getcwd()
-chrome_driver += "/chromedriver_mac" if platform.system() == "Darwin" else "/chromedriver_win.exe"
+if platform.system() == "Darwin":
+    chrome_driver += "/chromedriver_mac"
+elif platform.system() == "Linux":
+    chrome_driver += "/chromedriver_lin"
+else:
+    chrome_driver += "/chromedriver_win.exe"
 print(chrome_driver)
+
 driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=chrome_driver)
 
 def get_team_ids(url):

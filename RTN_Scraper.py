@@ -8,6 +8,7 @@ import os
 import platform
 from bs4 import BeautifulSoup
 import time
+
 # Set up chrome webdriver
 chrome_options = Options()
 chrome_options.add_argument('--headless')
@@ -41,12 +42,12 @@ def get_team_ids(url):
     print("Team ids complete")
     return team_ids
 
-def get_rosters(team_ids, base_url, past_url):
+def get_rosters(team_ids, base_url, year):
     rosters = {}
-    print("Getting 2020 rosters")
+    print("Getting " + year + " rosters")
     for team_name, team_id in team_ids.items():
         print(team_name)
-        driver.get(base_url + team_id)
+        driver.get(base_url + '/' + year + '/' + team_id)
         WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "rt-tr-group")))
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         rows = soup.find(class_='rt-table').find_all(class_='rt-tr')[1:]
@@ -58,12 +59,12 @@ def get_rosters(team_ids, base_url, past_url):
     print("--------------------------------------------")   
     return rosters
 
-def get_past_averages(past_url, team_ids, rosters):
+def get_all_individual_averages(past_url, year, team_ids, rosters):
     averages_team = {}
-    print("Getting 2019 averages")
+    print("Getting " + year + " averages")
     for team_name, team_id in team_ids.items():
         print(team_name)
-        driver.get(past_url + team_id)
+        driver.get(past_url + '/' + year + '/' + team_id)
         WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "rosterBox")))
         button = driver.find_element_by_xpath('//button[text()="Average"]')
         button.click()
@@ -93,9 +94,8 @@ def main():
    # womens_team_base_url = 'https://roadtonationals.com/results/teams/dashboard/2020/'
 
     mens_teams_url = 'https://roadtonationals.com/results/chartsM/'
-    mens_team_base_url = 'https://roadtonationals.com/results/teamsM/dashboard/2020/'
-    mens_team_past_url = 'https://roadtonationals.com/results/teamsM/dashboard/2019/'
-
+    mens_team_base_url = 'https://roadtonationals.com/results/teamsM/dashboard'
+    
    # womens_team_ids = {}
     mens_team_ids = {}
    # womens_rosters = {}
@@ -105,9 +105,9 @@ def main():
     mens_team_ids = get_team_ids(mens_teams_url)
 
    # womens_rosters = get_rosters(womens_team_ids, womens_team_base_url)
-    mens_rosters = get_rosters(mens_team_ids, mens_team_base_url, mens_team_past_url)
+    mens_rosters = get_rosters(mens_team_ids, mens_team_base_url, "2020")
 
-    mens_averages = get_past_averages(mens_team_past_url, mens_team_ids, mens_rosters)
+    mens_averages = get_all_individual_averages(mens_team_base_url, "2019", mens_team_ids, mens_rosters)
     # for team_name, roster in womens_rosters.items():
     #     print(team_name)
     #     print('-------------------------------')

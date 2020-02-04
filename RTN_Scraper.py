@@ -22,7 +22,6 @@ elif platform.system() == "Linux":
     chrome_driver += "/chromedriver_lin"
 else:
     chrome_driver += "/chromedriver_win.exe"
-print(chrome_driver)
 
 driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=chrome_driver)
 
@@ -50,7 +49,7 @@ def get_rosters(team_ids, base_url, year):
         driver.get(base_url + '/' + year + '/' + team_id)
         WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "rt-tr-group")))
         soup = BeautifulSoup(driver.page_source, 'html.parser')
-        rows = soup.find(class_='rt-table').find_all(class_='rt-tr')[1:]
+        rows = soup.find(class_='rosterBox').find(class_='rt-table').find_all(class_='rt-tr-group')[1:]
         roster = {}
         for row in rows:
             values = row.find_all(class_='rt-td')
@@ -59,12 +58,12 @@ def get_rosters(team_ids, base_url, year):
     print("--------------------------------------------")   
     return rosters
 
-def get_all_individual_averages(past_url, year, team_ids, rosters):
+def get_all_individual_averages(base_url, year, team_ids, rosters):
     averages_team = {}
     print("Getting " + year + " averages")
     for team_name, team_id in team_ids.items():
         print(team_name)
-        driver.get(past_url + '/' + year + '/' + team_id)
+        driver.get(base_url + '/' + year + '/' + team_id)
         WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "rosterBox")))
         button = driver.find_element_by_xpath('//button[text()="Average"]')
         button.click()
@@ -89,6 +88,26 @@ def get_all_individual_averages(past_url, year, team_ids, rosters):
     print("--------------------------------------------")   
     return averages_team
 
+def get_team_scores(team_ids, base_url, year):
+    team_scores = {}
+    print("Getting " + year + " team scores")
+    for team_name, team_id in team_ids.items():
+        print(team_name)
+        driver.get(base_url + '/' + year + '/' + team_id)
+        WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "scheduleBox")))
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        rows = soup.find(class_='scheduleBox').find(class_='rt-tbody').find_all(class_='rt-tr')
+        scores = {}
+        for row in rows:
+            values = row.find_all(class_='rt-td')
+            if str(values[2].string) != "None":
+                scores[values[1].string[5:]] = values[2].string
+        team_scores[team_name] = scores
+    return team_scores
+        
+        
+    
+
 def main():
    # womens_teams_url = 'https://roadtonationals.com/results/charts/'
    # womens_team_base_url = 'https://roadtonationals.com/results/teams/dashboard/2020/'
@@ -105,9 +124,10 @@ def main():
     mens_team_ids = get_team_ids(mens_teams_url)
 
    # womens_rosters = get_rosters(womens_team_ids, womens_team_base_url)
-    mens_rosters = get_rosters(mens_team_ids, mens_team_base_url, "2020")
+    #mens_rosters = get_rosters(mens_team_ids, mens_team_base_url, "2020")
 
-    mens_averages = get_all_individual_averages(mens_team_base_url, "2019", mens_team_ids, mens_rosters)
+    #mens_averages = get_all_individual_averages(mens_team_base_url, "2019", mens_team_ids, mens_rosters)
+    mens_team_scores = get_team_scores(mens_team_ids, mens_team_base_url, "2020")
     # for team_name, roster in womens_rosters.items():
     #     print(team_name)
     #     print('-------------------------------')
@@ -115,28 +135,32 @@ def main():
     #         print(team_member)
     #     print()
     # print('---------------------------------------------------------------------')
-    print("2020 ROSTERS")
-    for team_name, roster in mens_rosters.items():
-        print(team_name)
-        print('-------------------------------')
-        for team_member, infos  in roster.items():
-            print(team_member)
-            for info in infos:
-                print(info)
-            print("-------------")
-        print()
-    print('---------------------------------------------------------------------')
+    # print("2020 scores")
+    # for team_name, roster in mens_rosters.items():
+    #     print(team_name)
+    #     print('-------------------------------')
+    #     for team_member, infos  in roster.items():
+    #         print(team_member)
+    #         for info in infos:
+    #             print(info)
+    #         print("-------------")
+    #     print()
+    # print('---------------------------------------------------------------------')
 
-    print("2019 AVERAGES")
-    for team_name, averages in mens_averages.items():
-        print(team_name)
-        print('-------------------------------')
-        for team_member, events in averages.items():
-            print(team_member)
-            for event in events:
-                print(event + ': ' + str(mens_averages[team_name][team_member][event]))
-            print("-------------")
-        print()
-    print('---------------------------------------------------------------------')   
+    # print("2019 AVERAGES")
+    # for team_name, averages in mens_averages.items():
+    #     print(team_name)
+    #     print('-------------------------------')
+    #     for team_member, events in averages.items():
+    #         print(team_member)
+    #         for event in events:
+    #             print(event + ': ' + str(mens_averages[team_name][team_member][event]))
+    #         print("-------------")
+    #     print()
+    # print('---------------------------------------------------------------------')   
+    for team, scores in mens_team_scores.items():
+        print(team)
+        for date, score in scores.items():
+            print(str(date) + " : " + str(score))
 
 main()

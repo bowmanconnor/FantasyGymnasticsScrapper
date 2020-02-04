@@ -9,11 +9,11 @@ import platform
 from bs4 import BeautifulSoup
 import time
 
+
 # Set up chrome webdriver
 chrome_options = Options()
 chrome_options.add_argument('--headless')
 chrome_options.add_argument('--window-size=1920x1080')
-
 # differentiate based on operating system
 chrome_driver = os.getcwd()
 if platform.system() == "Darwin":
@@ -22,7 +22,6 @@ elif platform.system() == "Linux":
     chrome_driver += "/chromedriver_lin"
 else:
     chrome_driver += "/chromedriver_win.exe"
-
 driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=chrome_driver)
 
 def get_team_ids(url):
@@ -39,11 +38,13 @@ def get_team_ids(url):
         team_id = team_id_strarray[len(team_id_strarray) - 1]
         team_ids[team_name] = team_id
     print("Team ids complete")
+    print("--------------------------------------------")
     return team_ids
 
 def get_rosters(team_ids, base_url, year):
     rosters = {}
     print("Getting " + year + " rosters")
+    print("--------------------------------------------")
     for team_name, team_id in team_ids.items():
         print(team_name)
         driver.get(base_url + '/' + year + '/' + team_id)
@@ -61,6 +62,7 @@ def get_rosters(team_ids, base_url, year):
 def get_all_individual_averages(base_url, year, team_ids, rosters):
     averages_team = {}
     print("Getting " + year + " averages")
+    print("--------------------------------------------")  
     for team_name, team_id in team_ids.items():
         print(team_name)
         driver.get(base_url + '/' + year + '/' + team_id)
@@ -70,7 +72,7 @@ def get_all_individual_averages(base_url, year, team_ids, rosters):
         WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '[style="min-width: 750px;"]')))
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         averages = {}
-        rows = soup.find(class_='rt-tbody').find_all(class_='rt-tr-group')
+        rows = soup.find(class_='rosterBox').find(class_='rt-tbody').find_all(class_='rt-tr')
         for row in rows:
             values = row.find_all(class_='rt-td')
             full_name = values[0].string + ' '  + values[1].string
@@ -91,6 +93,7 @@ def get_all_individual_averages(base_url, year, team_ids, rosters):
 def get_team_scores(team_ids, base_url, year):
     team_scores = {}
     print("Getting " + year + " team scores")
+    print("--------------------------------------------")
     for team_name, team_id in team_ids.items():
         print(team_name)
         driver.get(base_url + '/' + year + '/' + team_id)
@@ -103,6 +106,7 @@ def get_team_scores(team_ids, base_url, year):
             if str(values[2].string) != "None":
                 scores[values[1].string[5:]] = values[2].string
         team_scores[team_name] = scores
+    print("--------------------------------------------")  
     return team_scores
         
         
@@ -114,50 +118,37 @@ def main():
 
     mens_teams_url = 'https://roadtonationals.com/results/chartsM/'
     mens_team_base_url = 'https://roadtonationals.com/results/teamsM/dashboard'
-    
-   # womens_team_ids = {}
-    mens_team_ids = {}
-   # womens_rosters = {}
-    mens_rosters = {}
-
-   # womens_team_ids = get_team_ids(womens_teams_url)
+ 
     mens_team_ids = get_team_ids(mens_teams_url)
-
-   # womens_rosters = get_rosters(womens_team_ids, womens_team_base_url)
-    #mens_rosters = get_rosters(mens_team_ids, mens_team_base_url, "2020")
-
-    #mens_averages = get_all_individual_averages(mens_team_base_url, "2019", mens_team_ids, mens_rosters)
+    mens_rosters = get_rosters(mens_team_ids, mens_team_base_url, "2020")
+    mens_averages = get_all_individual_averages(mens_team_base_url, "2019", mens_team_ids, mens_rosters)
     mens_team_scores = get_team_scores(mens_team_ids, mens_team_base_url, "2020")
-    # for team_name, roster in womens_rosters.items():
-    #     print(team_name)
-    #     print('-------------------------------')
-    #     for team_member in roster:
-    #         print(team_member)
-    #     print()
-    # print('---------------------------------------------------------------------')
-    # print("2020 scores")
-    # for team_name, roster in mens_rosters.items():
-    #     print(team_name)
-    #     print('-------------------------------')
-    #     for team_member, infos  in roster.items():
-    #         print(team_member)
-    #         for info in infos:
-    #             print(info)
-    #         print("-------------")
-    #     print()
-    # print('---------------------------------------------------------------------')
 
-    # print("2019 AVERAGES")
-    # for team_name, averages in mens_averages.items():
-    #     print(team_name)
-    #     print('-------------------------------')
-    #     for team_member, events in averages.items():
-    #         print(team_member)
-    #         for event in events:
-    #             print(event + ': ' + str(mens_averages[team_name][team_member][event]))
-    #         print("-------------")
-    #     print()
-    # print('---------------------------------------------------------------------')   
+    print("2020 Rosters")
+    for team_name, roster in mens_rosters.items():
+        print(team_name)
+        print('-------------------------------')
+        for team_member, infos  in roster.items():
+            print(team_member)
+            for info in infos:
+                print(info)
+            print("-------------")
+        print()
+    print('---------------------------------------------------------------------')
+
+    print("2019 Averages")
+    for team_name, averages in mens_averages.items():
+        print(team_name)
+        print('-------------------------------')
+        for team_member, events in averages.items():
+            print(team_member)
+            for event in events:
+                print(event + ': ' + str(mens_averages[team_name][team_member][event]))
+            print("-------------")
+        print()
+    print('---------------------------------------------------------------------')   
+    
+    print("Team Scores")
     for team, scores in mens_team_scores.items():
         print(team)
         for date, score in scores.items():

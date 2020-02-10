@@ -89,7 +89,7 @@ def get_all_individual_averages(past_url, year, team_ids, rosters):
     print("--------------------------------------------")   
     return averages_team
 
-def main():
+if __name__ == "__main__":
    # womens_teams_url = 'https://roadtonationals.com/results/charts/'
    # womens_team_base_url = 'https://roadtonationals.com/results/teams/dashboard/2020/'
 
@@ -139,4 +139,4 @@ def main():
         print()
     print('---------------------------------------------------------------------')   
 
-main()
+

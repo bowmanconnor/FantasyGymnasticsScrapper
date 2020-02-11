@@ -22,7 +22,7 @@ class Connector:
                 'path': path,
                 }
         doc_id = self.__collection.insert_one(doc).inserted_id
-        return doc
+        return doc_id
 
     def get_doc_id(self, dir, path):
         return self.__collection.find_one( {'dir': dir}, {'path': path} )['_id']
@@ -38,8 +38,6 @@ class Connector:
         return self.__collection.find_one_and_delete( {'dir': dir}, {'path': path} )
     
     def list_docs(self, path):
-        # for doc in self.__collection.find( {'path': path} ):
-        #     pprint(doc)
         for doc in self.__collection.find( {'path': path} ):
             pprint(doc)
         return
@@ -51,15 +49,15 @@ if __name__ == "__main__":
     print("----------------------------------------------------------------------------------------------------")
     # create and store a new user
     # print("ADDING NEW DOCUMENT...")
-    # print(mongoDB.create_directory("2019", "Men/"))
+    # print(mongoDB.create_directory("Army", "Men/2019/"))
     # print("----------------------------------------------------------------------------------------------------")
-    # pprint(mongoDB.list_users())
+    # pprint(mongoDB.list_docs())
     # print("----------------------------------------------------------------------------------------------------")
     # print("DELETING DOCUMENT...")
-    # pprint(mongoDB.delete_doc("2019", "Men/"))
+    # pprint(mongoDB.delete_doc("Army", "Men/2019/"))
     # print("----------------------------------------------------------------------------------------------------")
     # print docs in database
     print("LIST DOCUMENTS:")
-    pprint(mongoDB.list_docs(""))
+    pprint(mongoDB.list_docs("Men/"))
     print("----------------------------------------------------------------------------------------------------")
 

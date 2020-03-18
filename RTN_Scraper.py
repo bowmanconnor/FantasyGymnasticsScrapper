@@ -123,7 +123,28 @@ def get_team_scores(team_ids, base_url, year):
         team_scores[team_name] = scores
     print("--------------------------------------------")  
     return team_scores
-        
+
+def get_ncaa_team_scores(team_ids, base_url, year, ncaa=True):
+    team_scores = {}
+    print("Getting " + year + " team NCAA scores")
+    print("--------------------------------------------")
+    for team_name, team_id in team_ids.items():
+        print(team_name)
+        driver.get(base_url + '/' + year + '/' + team_id)
+        WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "scheduleBox")))
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        rows = soup.find(class_='scheduleBox').find(class_='rt-tbody').find_all(class_='rt-tr')
+        scores = {}
+        for row in rows:
+            values = row.find_all(class_='rt-td')
+            if ncaa == True and str(values[2].string) != "None" and "NCAA" in str(values[5].string):
+                scores[values[1].string[5:]] = values[2].string
+            elif ncaa == False and str(values[2].string) != "None" and not("NCAA" in str(values[5].string)):
+                scores[values[1].string[5:]] = values[2].string
+        team_scores[team_name] = scores
+    print("--------------------------------------------")  
+    return team_scores
+
 def get_all_individual_scores(athlete_base_url, year, team_ids, rosters):
     scores_ind_team = {}
     print("Getting " + year + " individual scores")
@@ -184,11 +205,13 @@ if __name__ == "__main__":
     mens_athletes_url = 'https://roadtonationals.com/results/teamsM/gymnast'
     mens_team_base_url = 'https://roadtonationals.com/results/teamsM/dashboard'
  
-    mens_team_ids = get_team_ids(mens_teams_url, "2020")
-    mens_rosters = get_rosters(mens_team_ids, mens_team_base_url, "2020")
-    mens_averages = get_all_individual_averages(mens_team_base_url, "2020", mens_team_ids, mens_rosters)
-    mens_team_scores = get_team_scores(mens_team_ids, mens_teams_url, "2020")
-    mens_ind_scores = get_all_individual_scores(mens_athletes_url, "2020", mens_team_ids, mens_rosters)
+    # mens_team_ids = get_team_ids(mens_teams_url, "2019")
+    # mens_rosters = get_rosters(mens_team_ids, mens_team_base_url, "2020")
+    # mens_averages = get_all_individual_averages(mens_team_base_url, "2020", mens_team_ids, mens_rosters)
+    # mens_team_scores = get_team_scores(mens_team_ids, mens_teams_url, "2019")
+    # mens_ind_scores = get_all_individual_scores(mens_athletes_url, "2020", mens_team_ids, mens_rosters)
+    # mens_ncaa_team_scores = get_ncaa_team_scores(mens_team_ids, mens_team_base_url, "2019", ncaa=False)
+    # print(mens_ncaa_team_scores)
 
 
     # write csv files for all of the mens team scores
@@ -196,12 +219,12 @@ if __name__ == "__main__":
     # team name for field names
     # meet dates
     # meet scores
-    # path = 'C:/Users/jbkul/Desktop/NQA_System_Research/team_scores_data/'
-    # rtn_years = ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020']
+    # path = 'C:/Users/jbkul/Desktop/NQA_System_Research/ncaa_scores_data/'
+    # rtn_years = ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019']
     # for year in rtn_years:
     #     mens_team_ids = get_team_ids(mens_teams_url, year)
-    #     mens_team_scores = get_team_scores(mens_team_ids, mens_teams_url, year)
-    #     filename = year + '_M_scores.csv'
+    #     mens_team_scores = get_ncaa_team_scores(mens_team_ids, mens_team_base_url, year, ncaa=False)
+    #     filename = year + '_M_no_ncaa_scores.csv'
     #     with open(path + filename, 'w', newline='') as f:
     #         writer = csv.writer(f)
     #         for team in mens_team_scores:

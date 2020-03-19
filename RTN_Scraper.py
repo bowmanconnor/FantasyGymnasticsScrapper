@@ -131,16 +131,17 @@ def get_ncaa_team_scores(team_ids, base_url, year, ncaa=True):
     for team_name, team_id in team_ids.items():
         print(team_name)
         driver.get(base_url + '/' + year + '/' + team_id)
-        WebDriverWait(driver, 1000).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "scheduleBox")))
+        WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "scheduleBox")))
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         rows = soup.find(class_='scheduleBox').find(class_='rt-tbody').find_all(class_='rt-tr')
         scores = {}
         for row in rows:
             values = row.find_all(class_='rt-td')
-            if ncaa == True and str(values[2].string) != "None" and "NCAA" in str(values[5].string):
-                scores[values[1].string[5:]] = values[2].string
-            elif ncaa == False and str(values[2].string) != "None" and not("NCAA" in str(values[5].string)):
-                scores[values[1].string[5:]] = values[2].string
+            if str(values[2].string) != "None" and float(values[2].string) != 0.0:
+                if ncaa == True and "NCAA" in str(values[5].string):
+                    scores[values[1].string[5:]] = values[2].string
+                elif ncaa == False and not("NCAA" in str(values[5].string)):
+                    scores[values[1].string[5:]] = values[2].string
         team_scores[team_name] = scores
     print("--------------------------------------------")  
     return team_scores
@@ -200,12 +201,13 @@ def get_all_individual_scores(athlete_base_url, year, team_ids, rosters):
 if __name__ == "__main__":
    # womens_teams_url = 'https://roadtonationals.com/results/charts/'
    # womens_team_base_url = 'https://roadtonationals.com/results/teams/dashboard/2020/'
-
+    mens_final_scores_url = 'https://roadtonationals.com/results/standingsM/final'
     mens_teams_url = 'https://roadtonationals.com/results/chartsM/allteams'
     mens_athletes_url = 'https://roadtonationals.com/results/teamsM/gymnast'
     mens_team_base_url = 'https://roadtonationals.com/results/teamsM/dashboard'
- 
-    # mens_team_ids = get_team_ids(mens_teams_url, "2019")
+    
+    # mens_NQAs = get_team_NQAs(mens_final_scores, "2019")
+    # mens_team_ids = get_team_ids(mens_teams_url, "2020")
     # mens_rosters = get_rosters(mens_team_ids, mens_team_base_url, "2020")
     # mens_averages = get_all_individual_averages(mens_team_base_url, "2020", mens_team_ids, mens_rosters)
     # mens_team_scores = get_team_scores(mens_team_ids, mens_teams_url, "2019")
@@ -213,6 +215,17 @@ if __name__ == "__main__":
     # mens_ncaa_team_scores = get_ncaa_team_scores(mens_team_ids, mens_team_base_url, "2019", ncaa=False)
     # print(mens_ncaa_team_scores)
 
+    # NQA Scores
+    # path = 'C:/Users/jbkul/Desktop/NQA_System_Research/NQA_scores_data/'
+    # rtn_years = ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019']
+    # for year in rtn_years:
+    #     mens_NQAs = get_team_NQAs(mens_final_scores_url, year)
+    #     filename = year + '_M_NQAs.csv'
+    #     with open(path + filename, 'w', newline='') as f:
+    #         teams = list(mens_NQAs.keys())
+    #         writer = csv.DictWriter(f, fieldnames=teams)
+    #         writer.writeheader()
+    #         writer.writerow(mens_NQAs)
 
     # write csv files for all of the mens team scores
     # year.csv
@@ -233,7 +246,32 @@ if __name__ == "__main__":
     #             score_writer = csv.DictWriter(f, fieldnames=dates)
     #             score_writer.writeheader()
     #             score_writer.writerow(mens_team_scores[team])
-        
+    
+    # BETTER SCORE WRITER
+    # team's scores per column
+    # path = 'C:/Users/jbkul/Desktop/NQA_System_Research/ncaa_scores_data/'
+    # rtn_years = ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019']
+    # for year in rtn_years:
+    #     mens_team_ids = get_team_ids(mens_teams_url, year)
+    #     mens_team_scores = get_ncaa_team_scores(mens_team_ids, mens_team_base_url, year, ncaa=False)
+    #     filename = year + '_M_no_ncaa_scores.csv'
+    #     print("Writing " + filename + "..."+"\n--------------------------------------------")
+    #     data = list()
+    #     teams = list(mens_team_scores.keys())
+    #     n = len(max(mens_team_scores.values(), key=len))
+    #     data.append(teams)
+    #     for i in range(n):
+    #         row = list()
+    #         for team in mens_team_scores:
+    #             if i < len(list(mens_team_scores[team].values())):
+    #                 row.append(list(mens_team_scores[team].values())[i])
+    #             else:
+    #                 row.append(None)
+    #         data.append(row)
+    #     with open(path + filename, 'w', newline='') as f:
+    #         score_writer = csv.writer(f)
+    #         for row in data:
+    #             score_writer.writerow(row)
 
     # for team in mens_team_scores:
     #     print("--------------------------------------------")

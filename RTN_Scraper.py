@@ -196,6 +196,21 @@ def get_all_individual_scores(athlete_base_url, year, team_ids, rosters):
     print("---------------------------------------------------------") 
     return scores_ind_team     
 
+def get_team_NQAs(base_url, year):
+    team_NQAs = {}
+    driver.get(base_url)
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "year_filter")))
+    select = Select(driver.find_element_by_id("year_filter"))
+    select.select_by_visible_text(year)
+    WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, "rt-tr-group")))
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    rows = soup.find(class_='rt-table').find(class_='rt-tbody').find_all(class_='rt-tr-group')
+    for row in rows:
+            values = row.find_all(class_='rt-td')
+            team_NQAs[values[1].string] = values[4].string
+            print(values[1].string, ": ", values[4].string)
+    print("--------------------------------------------")  
+    return team_NQAs
             
 
 if __name__ == "__main__":
@@ -206,7 +221,7 @@ if __name__ == "__main__":
     mens_athletes_url = 'https://roadtonationals.com/results/teamsM/gymnast'
     mens_team_base_url = 'https://roadtonationals.com/results/teamsM/dashboard'
     
-    # mens_NQAs = get_team_NQAs(mens_final_scores, "2019")
+    # mens_NQAs = get_team_NQAs(mens_final_scores_url, "2019")
     # mens_team_ids = get_team_ids(mens_teams_url, "2020")
     # mens_rosters = get_rosters(mens_team_ids, mens_team_base_url, "2020")
     # mens_averages = get_all_individual_averages(mens_team_base_url, "2020", mens_team_ids, mens_rosters)
